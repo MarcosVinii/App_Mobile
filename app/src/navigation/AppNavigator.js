@@ -5,6 +5,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import useAuth from '../hooks/useAuth';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
+import RoomDetailsScreen from '../screens/RoomDetailsScreen';
+import RoomFormScreen from '../screens/RoomFormScreen';
 import MainTabs from './MainTabs';
 
 const Stack = createNativeStackNavigator();
@@ -23,7 +25,22 @@ export default function AppNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user ? (
-        <Stack.Screen name="MainTabs" component={MainTabs} />
+        <>
+          <Stack.Screen name="MainTabs" component={MainTabs} />
+          <Stack.Screen
+            name="RoomDetails"
+            component={RoomDetailsScreen}
+            options={{ headerShown: true, title: 'Cômodo' }}
+          />
+          <Stack.Screen
+            name="RoomForm"
+            component={RoomFormScreen}
+            options={({ route }) => ({
+              headerShown: true,
+              title: route.params?.roomId ? 'Editar cômodo' : 'Novo cômodo',
+            })}
+          />
+        </>
       ) : (
         <>
           <Stack.Screen name="Login" component={LoginScreen} />

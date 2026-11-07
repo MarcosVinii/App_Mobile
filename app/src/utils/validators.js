@@ -1,5 +1,7 @@
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 6;
+const MIN_ROOM_NAME_LENGTH = 2;
+const MAX_ROOM_NAME_LENGTH = 40;
 
 function removeEmpty(errors) {
   return Object.fromEntries(Object.entries(errors).filter(([, message]) => message));
@@ -33,5 +35,16 @@ export function validateRegisterForm({ name, email, password, confirmPassword })
     password: getNewPasswordError(password),
     confirmPassword:
       confirmPassword !== password ? 'As senhas não coincidem.' : null,
+  });
+}
+
+export function validateRoomForm({ name }) {
+  const length = name.trim().length;
+  const isValid = length >= MIN_ROOM_NAME_LENGTH && length <= MAX_ROOM_NAME_LENGTH;
+
+  return removeEmpty({
+    name: isValid
+      ? null
+      : `O nome deve ter entre ${MIN_ROOM_NAME_LENGTH} e ${MAX_ROOM_NAME_LENGTH} caracteres.`,
   });
 }
