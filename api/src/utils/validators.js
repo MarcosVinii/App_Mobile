@@ -1,9 +1,20 @@
 const AppError = require('./AppError');
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const ICON_REGEX = /^[a-z0-9-]{1,40}$/;
 
 function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
+}
+
+function parseId(value) {
+  const id = Number(value);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new AppError('Identificador inválido.', 400);
+  }
+
+  return id;
 }
 
 function validateRegisterInput(body = {}) {
@@ -35,4 +46,23 @@ function validateLoginInput(body = {}) {
   return { email, password };
 }
 
-module.exports = { validateRegisterInput, validateLoginInput };
+function validateRoomInput(body = {}) {
+  const name = String(body.name || '').trim();
+  const icon = String(body.icon || 'door').trim();
+
+  if (name.length < 2 || name.length > 40) {
+    throw new AppError('O nome do cômodo deve ter entre 2 e 40 caracteres.', 400);
+  }
+  if (!ICON_REGEX.test(icon)) {
+    throw new AppError('Ícone inválido.', 400);
+  }
+
+  return { name, icon };
+}
+
+module.exports = {
+  parseId,
+  validateRegisterInput,
+  validateLoginInput,
+  validateRoomInput,
+};
