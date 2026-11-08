@@ -1,6 +1,8 @@
 import { StyleSheet } from 'react-native';
 import { Avatar, Card, IconButton } from 'react-native-paper';
 
+import RoomStockSummary from './RoomStockSummary';
+
 export default function RoomCard({ room, onPress, onEdit, onDelete }) {
   return (
     <Card
@@ -27,12 +29,18 @@ export default function RoomCard({ room, onPress, onEdit, onDelete }) {
           </>
         )}
       />
+      <Card.Content style={styles.content}>
+        <RoomStockSummary room={room} />
+      </Card.Content>
     </Card>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
+    marginBottom: 12,
+  },
+  content: {
     marginBottom: 12,
   },
 });

@@ -1,12 +1,14 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { Button, Divider, IconButton, Text, useTheme } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
 
+import OptionChips from '../components/OptionChips';
 import ProductRow from '../components/ProductRow';
 import StatusView from '../components/StatusView';
 import * as productService from '../services/productService';
 import * as roomService from '../services/roomService';
+import { DEFAULT_SORT, SORT_OPTIONS, sortProducts } from '../utils/productSort';
 
 function buildSummary(products) {
   if (products.length === 0) return '';
@@ -26,6 +28,7 @@ export default function RoomDetailsScreen({ route, navigation }) {
   const theme = useTheme();
 
   const [products, setProducts] = useState([]);
+  const [sortKey, setSortKey] = useState(DEFAULT_SORT);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -67,13 +70,17 @@ export default function RoomDetailsScreen({ route, navigation }) {
     loadData();
   }
 
+  const sortedProducts = useMemo(
+    () => sortProducts(products, sortKey),
+    [products, sortKey]
+  );
   const summary = buildSummary(products);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusView isLoading={isLoading} error={error} onRetry={handleRetry}>
         <FlatList
-          data={products}
+          data={sortedProducts}
           keyExtractor={(product) => String(product.id)}
           renderItem={({ item }) => (
             <ProductRow
@@ -99,6 +106,19 @@ export default function RoomDetailsScreen({ route, navigation }) {
               >
                 Adicionar produto
               </Button>
+
+              {products.length > 1 ? (
+                <View style={styles.sortBox}>
+                  <Text variant="titleSmall" style={styles.sortTitle}>
+                    Ordenar por
+                  </Text>
+                  <OptionChips
+                    options={SORT_OPTIONS}
+                    value={sortKey}
+                    onChange={setSortKey}
+                  />
+                </View>
+              ) : null}
             </View>
           }
           ListEmptyComponent={
@@ -126,6 +146,12 @@ const styles = StyleSheet.create({
   },
   summary: {
     marginBottom: 12,
+  },
+  sortBox: {
+    marginTop: 16,
+  },
+  sortTitle: {
+    marginBottom: 8,
   },
   empty: {
     textAlign: 'center',
