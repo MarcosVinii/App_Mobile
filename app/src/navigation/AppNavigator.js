@@ -4,6 +4,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import useAuth from '../hooks/useAuth';
 import LoginScreen from '../screens/LoginScreen';
+import ProductDetailsScreen from '../screens/ProductDetailsScreen';
+import ProductFormScreen from '../screens/ProductFormScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import RoomDetailsScreen from '../screens/RoomDetailsScreen';
 import RoomFormScreen from '../screens/RoomFormScreen';
@@ -38,6 +40,19 @@ export default function AppNavigator() {
             options={({ route }) => ({
               headerShown: true,
               title: route.params?.roomId ? 'Editar cômodo' : 'Novo cômodo',
+            })}
+          />
+          <Stack.Screen
+            name="ProductDetails"
+            component={ProductDetailsScreen}
+            options={{ headerShown: true, title: 'Produto' }}
+          />
+          <Stack.Screen
+            name="ProductForm"
+            component={ProductFormScreen}
+            options={({ route }) => ({
+              headerShown: true,
+              title: route.params?.productId ? 'Editar produto' : 'Novo produto',
             })}
           />
         </>

@@ -11,11 +11,12 @@ const theme = {
   },
 };
 
-// Cores de situação do estoque (sempre acompanhadas de ícone ou texto)
+// Cores de situação do estoque (sempre acompanhadas de ícone ou texto).
+// Tons escolhidos para manter bom contraste sobre fundo claro.
 export const statusColors = {
   outOfStock: '#C0392B',
-  lowStock: '#D4A017',
-  normal: '#3E8E5A',
+  lowStock: '#8F5E00',
+  normal: '#2E7D4F',
   secondary: '#8A8A8A',
 };
 
