@@ -1,3 +1,5 @@
+import './src/utils/webSetup';
+
 import { NavigationContainer } from '@react-navigation/native';
 import { PaperProvider } from 'react-native-paper';
 import { StatusBar } from 'expo-status-bar';

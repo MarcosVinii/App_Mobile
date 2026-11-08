@@ -3,8 +3,8 @@ import { FlatList, StyleSheet, View } from 'react-native';
 import { Button, Divider, IconButton, Text, useTheme } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
 
-import OptionChips from '../components/OptionChips';
 import ProductRow from '../components/ProductRow';
+import SortMenu from '../components/SortMenu';
 import StatusView from '../components/StatusView';
 import * as productService from '../services/productService';
 import * as roomService from '../services/roomService';
@@ -109,10 +109,7 @@ export default function RoomDetailsScreen({ route, navigation }) {
 
               {products.length > 1 ? (
                 <View style={styles.sortBox}>
-                  <Text variant="titleSmall" style={styles.sortTitle}>
-                    Ordenar por
-                  </Text>
-                  <OptionChips
+                  <SortMenu
                     options={SORT_OPTIONS}
                     value={sortKey}
                     onChange={setSortKey}
@@ -149,9 +146,7 @@ const styles = StyleSheet.create({
   },
   sortBox: {
     marginTop: 16,
-  },
-  sortTitle: {
-    marginBottom: 8,
+    alignItems: 'flex-start',
   },
   empty: {
     textAlign: 'center',
