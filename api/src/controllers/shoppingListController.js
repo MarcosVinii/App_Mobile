@@ -1,5 +1,7 @@
 const shoppingListService = require('../services/shoppingListService');
 const shoppingSectionService = require('../services/shoppingSectionService');
+const smartListService = require('../services/smartListService');
+const listCommandService = require('../services/listCommandService');
 const { parseId } = require('../utils/validators');
 
 function listId(req) {
@@ -70,4 +72,30 @@ function createSection(req, res, next) {
   }
 }
 
-module.exports = { list, getById, create, rename, remove, reorder, createSection };
+function syncSmartList(req, res, next) {
+  try {
+    res.json(smartListService.syncSmartList(req.userId));
+  } catch (error) {
+    next(error);
+  }
+}
+
+function importCommands(req, res, next) {
+  try {
+    res.json(listCommandService.importCommands(req.userId, listId(req), req.body));
+  } catch (error) {
+    next(error);
+  }
+}
+
+module.exports = {
+  list,
+  getById,
+  create,
+  rename,
+  remove,
+  reorder,
+  createSection,
+  syncSmartList,
+  importCommands,
+};

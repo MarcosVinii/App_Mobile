@@ -35,7 +35,7 @@ function assertSameIds(received, expected, label) {
 
   if (!isSame) {
     throw new AppError(
-      `A nova ordem deve conter exatamente todos os ${label} da lista, sem repetir.`,
+      `A nova ordem deve conter exatamente ${label} da lista, sem repetir.`,
       400
     );
   }
@@ -82,11 +82,11 @@ function reorderList(userId, listId, body) {
   const sections = shoppingSectionRepository.findAllByList(listId);
   const items = shoppingItemRepository.findAllByList(listId);
 
-  assertSameIds(sectionIds, sections.map((section) => section.id), 'seções');
+  assertSameIds(sectionIds, sections.map((section) => section.id), 'todas as seções');
   assertSameIds(
     itemGroups.flatMap((group) => group.itemIds),
     items.map((item) => item.id),
-    'itens'
+    'todos os itens'
   );
 
   // Itens só podem ficar "sem seção" ou dentro de uma seção de verdade (não divisor)

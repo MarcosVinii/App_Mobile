@@ -18,6 +18,12 @@ function findAllCustomByUser(userId) {
     .all(userId);
 }
 
+function findSmartByUser(userId) {
+  return db
+    .prepare(`${SELECT_LIST} WHERE l.user_id = ? AND l.kind = 'smart' GROUP BY l.id`)
+    .get(userId);
+}
+
 function findByIdForUser(id, userId) {
   return db
     .prepare(`${SELECT_LIST} WHERE l.id = ? AND l.user_id = ? GROUP BY l.id`)
@@ -45,4 +51,11 @@ function remove(id, userId) {
   db.prepare('DELETE FROM shopping_lists WHERE id = ? AND user_id = ?').run(id, userId);
 }
 
-module.exports = { findAllCustomByUser, findByIdForUser, create, updateTitle, remove };
+module.exports = {
+  findAllCustomByUser,
+  findSmartByUser,
+  findByIdForUser,
+  create,
+  updateTitle,
+  remove,
+};

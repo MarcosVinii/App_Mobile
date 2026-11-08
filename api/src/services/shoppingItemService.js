@@ -121,7 +121,16 @@ function changeStatus(userId, itemId, body) {
 }
 
 function deleteItem(userId, itemId) {
-  getItem(userId, itemId);
+  const item = getItem(userId, itemId);
+  const list = getList(userId, item.list_id);
+
+  // Sugestão removida da lista inteligente fica "descartada",
+  // para não voltar sozinha na próxima atualização
+  if (list.kind === 'smart' && item.origin === 'suggestion') {
+    shoppingItemRepository.updateStatus(itemId, 'dismissed');
+    return;
+  }
+
   shoppingItemRepository.remove(itemId);
 }
 
