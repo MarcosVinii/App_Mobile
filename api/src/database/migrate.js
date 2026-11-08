@@ -55,6 +55,58 @@ function createTables() {
 
     CREATE INDEX IF NOT EXISTS idx_products_user_id ON products(user_id);
     CREATE INDEX IF NOT EXISTS idx_products_room_id ON products(room_id);
+
+    CREATE TABLE IF NOT EXISTS shopping_lists (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      kind TEXT NOT NULL DEFAULT 'custom' CHECK (kind IN ('custom', 'smart')),
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_shopping_lists_user_id ON shopping_lists(user_id);
+
+    -- Cada usuário pode ter no máximo uma lista inteligente
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_shopping_lists_smart
+      ON shopping_lists(user_id) WHERE kind = 'smart';
+
+    CREATE TABLE IF NOT EXISTS shopping_sections (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      list_id INTEGER NOT NULL,
+      type TEXT NOT NULL DEFAULT 'section' CHECK (type IN ('section', 'divider')),
+      title TEXT,
+      position INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (list_id) REFERENCES shopping_lists(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_shopping_sections_list_id ON shopping_sections(list_id);
+
+    CREATE TABLE IF NOT EXISTS shopping_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      list_id INTEGER NOT NULL,
+      section_id INTEGER,
+      product_id INTEGER,
+      name TEXT NOT NULL,
+      name_normalized TEXT NOT NULL,
+      quantity REAL NOT NULL DEFAULT 1 CHECK (quantity > 0),
+      unit TEXT NOT NULL DEFAULT 'un',
+      status TEXT NOT NULL DEFAULT 'pending'
+        CHECK (status IN ('pending', 'purchased', 'dismissed')),
+      origin TEXT NOT NULL DEFAULT 'manual' CHECK (origin IN ('manual', 'suggestion')),
+      position INTEGER NOT NULL DEFAULT 0,
+      purchased_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (list_id) REFERENCES shopping_lists(id) ON DELETE CASCADE,
+      FOREIGN KEY (section_id) REFERENCES shopping_sections(id) ON DELETE SET NULL,
+      FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_shopping_items_list_id ON shopping_items(list_id);
+    CREATE INDEX IF NOT EXISTS idx_shopping_items_product_id ON shopping_items(product_id);
   `);
 }
 

@@ -131,6 +131,9 @@ function validateQuantityDelta(body = {}) {
 }
 
 module.exports = {
+  MAX_QUANTITY,
+  toNumber,
+  roundQuantity,
   parseId,
   validateRegisterInput,
   validateLoginInput,

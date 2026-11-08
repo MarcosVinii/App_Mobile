@@ -5,6 +5,9 @@ const authRoutes = require('./routes/authRoutes');
 const roomRoutes = require('./routes/roomRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const productRoutes = require('./routes/productRoutes');
+const shoppingListRoutes = require('./routes/shoppingListRoutes');
+const shoppingSectionRoutes = require('./routes/shoppingSectionRoutes');
+const shoppingItemRoutes = require('./routes/shoppingItemRoutes');
 const { notFound, errorHandler } = require('./middlewares/errorHandler');
 
 const app = express();
@@ -17,6 +20,9 @@ app.use(authRoutes);
 app.use(roomRoutes);
 app.use(categoryRoutes);
 app.use(productRoutes);
+app.use(shoppingListRoutes);
+app.use(shoppingSectionRoutes);
+app.use(shoppingItemRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
