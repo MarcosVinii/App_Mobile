@@ -21,13 +21,14 @@ export default function ShoppingListFormScreen({ route, navigation }) {
   const theme = useTheme();
 
   const [title, setTitle] = useState('');
+  const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(isEditing);
   const [loadError, setLoadError] = useState('');
 
-  // No modo edição, carrega a lista para preencher o título
+  // No modo edição, carrega a lista para preencher título e observações
   const loadList = useCallback(async () => {
     if (!isEditing) return;
 
@@ -37,6 +38,7 @@ export default function ShoppingListFormScreen({ route, navigation }) {
     try {
       const detail = await shoppingListService.getListDetail(listId);
       setTitle(detail.list.title);
+      setNotes(detail.list.notes || '');
     } catch (err) {
       setLoadError(err.message);
     } finally {
@@ -49,19 +51,21 @@ export default function ShoppingListFormScreen({ route, navigation }) {
   }, [loadList]);
 
   async function handleSave() {
-    const validationErrors = validateListForm({ title });
+    const validationErrors = validateListForm({ title, notes });
     setErrors(validationErrors);
     setSubmitError('');
 
     if (Object.keys(validationErrors).length > 0) return;
 
+    const data = { title: title.trim(), notes: notes.trim() };
+
     setIsSubmitting(true);
     try {
       if (isEditing) {
-        await shoppingListService.renameList(listId, title.trim());
+        await shoppingListService.updateList(listId, data);
         navigation.goBack();
       } else {
-        const created = await shoppingListService.createList(title.trim());
+        const created = await shoppingListService.createList(data);
         // Abre a lista recém-criada; voltar leva à aba Compras
         navigation.replace('ShoppingListDetails', { listId: created.id });
       }
@@ -82,7 +86,7 @@ export default function ShoppingListFormScreen({ route, navigation }) {
           {!isEditing ? (
             <>
               <Text variant="titleSmall" style={styles.sectionTitle}>
-                Sugestões
+                Sugestões de título
               </Text>
               <View style={styles.chips}>
                 <OptionChips options={TITLE_SUGGESTIONS} value={title} onChange={setTitle} />
@@ -91,15 +95,31 @@ export default function ShoppingListFormScreen({ route, navigation }) {
           ) : null}
 
           <TextInput
-            label="Título da lista"
+            label="Título (opcional)"
             mode="outlined"
             value={title}
             onChangeText={setTitle}
             maxLength={60}
             error={Boolean(errors.title)}
           />
-          <HelperText type="error" visible={Boolean(errors.title)}>
-            {errors.title}
+          <HelperText type={errors.title ? 'error' : 'info'} visible>
+            {errors.title || 'Se ficar em branco, usamos a data de hoje como título.'}
+          </HelperText>
+
+          <TextInput
+            label="Bloco de notas (opcional)"
+            mode="outlined"
+            value={notes}
+            onChangeText={setNotes}
+            placeholder="Objetivo da compra, observações sobre os produtos, instruções para quem vai comprar..."
+            multiline
+            numberOfLines={6}
+            maxLength={2000}
+            style={styles.notes}
+            error={Boolean(errors.notes)}
+          />
+          <HelperText type="error" visible={Boolean(errors.notes)}>
+            {errors.notes}
           </HelperText>
 
           <HelperText type="error" visible={Boolean(submitError)}>
@@ -136,6 +156,9 @@ const styles = StyleSheet.create({
   },
   chips: {
     marginBottom: 20,
+  },
+  notes: {
+    minHeight: 140,
   },
   button: {
     marginTop: 8,

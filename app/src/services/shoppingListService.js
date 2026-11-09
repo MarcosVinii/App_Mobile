@@ -15,18 +15,19 @@ export function syncSmartList() {
   return apiRequest('/shopping-lists/smart/sync', { method: 'POST' });
 }
 
-export async function createList(title) {
+// Título e observações são opcionais
+export async function createList({ title, notes }) {
   const data = await apiRequest('/shopping-lists', {
     method: 'POST',
-    body: { title },
+    body: { title, notes },
   });
   return data.list;
 }
 
-export async function renameList(listId, title) {
+export async function updateList(listId, { title, notes }) {
   const data = await apiRequest(`/shopping-lists/${listId}`, {
     method: 'PUT',
-    body: { title },
+    body: { title, notes },
   });
   return data.list;
 }

@@ -11,6 +11,8 @@ import RoomDetailsScreen from '../screens/RoomDetailsScreen';
 import RoomFormScreen from '../screens/RoomFormScreen';
 import ShoppingListDetailsScreen from '../screens/ShoppingListDetailsScreen';
 import ShoppingListFormScreen from '../screens/ShoppingListFormScreen';
+import WarehouseOrganizeScreen from '../screens/WarehouseOrganizeScreen';
+import WarehouseScreen from '../screens/WarehouseScreen';
 import MainTabs from './MainTabs';
 
 const Stack = createNativeStackNavigator();
@@ -67,8 +69,18 @@ export default function AppNavigator() {
             component={ShoppingListFormScreen}
             options={({ route }) => ({
               headerShown: true,
-              title: route.params?.listId ? 'Renomear lista' : 'Nova lista',
+              title: route.params?.listId ? 'Editar lista' : 'Nova lista',
             })}
+          />
+          <Stack.Screen
+            name="Warehouse"
+            component={WarehouseScreen}
+            options={{ headerShown: true, title: 'Armazém de Compras' }}
+          />
+          <Stack.Screen
+            name="WarehouseOrganize"
+            component={WarehouseOrganizeScreen}
+            options={{ headerShown: true, title: 'Organizar item' }}
           />
         </>
       ) : (

@@ -1,22 +1,25 @@
-import { useCallback, useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
-import { Avatar, Button, Card, Snackbar, Text, useTheme } from 'react-native-paper';
+import { useCallback, useMemo, useState } from 'react';
+import { SectionList, StyleSheet, View } from 'react-native';
+import { Avatar, Button, Card, Text, useTheme } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
 
 import ConfirmDialog from '../components/ConfirmDialog';
 import ShoppingListCard from '../components/ShoppingListCard';
 import StatusView from '../components/StatusView';
+import WarehouseFab from '../components/WarehouseFab';
+import useToast from '../hooks/useToast';
 import * as shoppingListService from '../services/shoppingListService';
+import { buildListSections } from '../utils/listStatus';
 
 export default function ShoppingScreen({ navigation }) {
   const theme = useTheme();
+  const { showToast } = useToast();
 
   const [lists, setLists] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [listToDelete, setListToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [message, setMessage] = useState('');
 
   const loadLists = useCallback(async () => {
     setError('');
@@ -49,17 +52,19 @@ export default function ShoppingScreen({ navigation }) {
       await loadLists();
     } catch (err) {
       setListToDelete(null);
-      setMessage(err.message);
+      showToast(err.message, { type: 'error' });
     } finally {
       setIsDeleting(false);
     }
   }
 
+  const sections = useMemo(() => buildListSections(lists), [lists]);
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusView isLoading={isLoading} error={error} onRetry={handleRetry}>
-        <FlatList
-          data={lists}
+        <SectionList
+          sections={sections}
           keyExtractor={(list) => String(list.id)}
           renderItem={({ item }) => (
             <ShoppingListCard
@@ -69,6 +74,15 @@ export default function ShoppingScreen({ navigation }) {
               onDelete={() => setListToDelete(item)}
             />
           )}
+          renderSectionHeader={({ section }) => (
+            <Text
+              variant="titleSmall"
+              style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}
+            >
+              {section.title}
+            </Text>
+          )}
+          stickySectionHeadersEnabled={false}
           ListHeaderComponent={
             <View>
               <Card
@@ -115,9 +129,7 @@ export default function ShoppingScreen({ navigation }) {
         onDismiss={() => setListToDelete(null)}
       />
 
-      <Snackbar visible={Boolean(message)} onDismiss={() => setMessage('')}>
-        {message}
-      </Snackbar>
+      <WarehouseFab />
     </View>
   );
 }
@@ -138,6 +150,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 12,
+  },
+  sectionTitle: {
+    marginTop: 8,
+    marginBottom: 8,
   },
   empty: {
     textAlign: 'center',

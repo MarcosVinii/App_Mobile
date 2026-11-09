@@ -1,24 +1,29 @@
 import { useCallback, useMemo, useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
-import { Divider, IconButton, List, Snackbar, Text, useTheme } from 'react-native-paper';
+import { Card, Divider, IconButton, List, Text, useTheme } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
 
 import ShoppingItemRow from '../components/ShoppingItemRow';
+import SmartOrganizationButton from '../components/SmartOrganizationButton';
 import StatusView from '../components/StatusView';
+import usePreferences from '../hooks/usePreferences';
+import useToast from '../hooks/useToast';
 import * as shoppingItemService from '../services/shoppingItemService';
 import * as shoppingListService from '../services/shoppingListService';
+import { getPurchaseFeedback } from '../utils/purchaseMessages';
 import { buildListRows, buildProgressText } from '../utils/shoppingLayout';
 
 export default function ShoppingListDetailsScreen({ route, navigation }) {
   const isSmart = Boolean(route.params?.smart);
   const listId = route.params?.listId;
   const theme = useTheme();
+  const { smartOrganization } = usePreferences();
+  const { showToast } = useToast();
 
   const [detail, setDetail] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [updatingItemId, setUpdatingItemId] = useState(null);
-  const [message, setMessage] = useState('');
 
   const loadData = useCallback(async () => {
     setError('');
@@ -32,15 +37,18 @@ export default function ShoppingListDetailsScreen({ route, navigation }) {
       setDetail({ list: data.list, sections: data.sections, items: data.items });
       navigation.setOptions({
         title: data.list.title,
-        headerRight: isSmart
-          ? undefined
-          : () => (
+        headerRight: () => (
+          <View style={styles.headerActions}>
+            <SmartOrganizationButton />
+            {isSmart ? null : (
               <IconButton
                 icon="pencil-outline"
                 onPress={() => navigation.navigate('ShoppingListForm', { listId })}
-                accessibilityLabel="Renomear lista"
+                accessibilityLabel="Editar lista"
               />
-            ),
+            )}
+          </View>
+        ),
       });
     } catch (err) {
       setError(err.message);
@@ -65,16 +73,31 @@ export default function ShoppingListDetailsScreen({ route, navigation }) {
 
     setUpdatingItemId(item.id);
     try {
-      const updated = await shoppingItemService.changeItemStatus(item.id, nextStatus);
+      const result = await shoppingItemService.changeItemStatus(
+        item.id,
+        nextStatus,
+        smartOrganization
+      );
 
-      setDetail((current) => ({
-        ...current,
-        items: current.items.map((existing) =>
-          existing.id === updated.id ? updated : existing
-        ),
-      }));
+      const nextItems = detail.items.map((existing) =>
+        existing.id === result.item.id ? result.item : existing
+      );
+      setDetail({ ...detail, items: nextItems });
+
+      const feedback = getPurchaseFeedback(result.outcome);
+      if (feedback) {
+        showToast(feedback.message, { type: feedback.type });
+      }
+
+      const isCompleted =
+        !isSmart && nextItems.length > 0 && nextItems.every((entry) => entry.status === 'purchased');
+      if (isCompleted) {
+        showToast('Lista concluída! Ela agora aparece em "Listas concluídas".', {
+          type: 'success',
+        });
+      }
     } catch (err) {
-      setMessage(err.message);
+      showToast(err.message, { type: 'error' });
     } finally {
       setUpdatingItemId(null);
     }
@@ -85,6 +108,7 @@ export default function ShoppingListDetailsScreen({ route, navigation }) {
     [detail]
   );
   const progressText = detail ? buildProgressText(detail.items) : '';
+  const notes = detail?.list.notes;
 
   function renderRow({ item: row }) {
     if (row.type === 'section') {
@@ -112,14 +136,26 @@ export default function ShoppingListDetailsScreen({ route, navigation }) {
           keyExtractor={(row) => row.key}
           renderItem={renderRow}
           ListHeaderComponent={
-            progressText ? (
-              <Text
-                variant="bodyMedium"
-                style={[styles.progress, { color: theme.colors.onSurfaceVariant }]}
-              >
-                {progressText}
-              </Text>
-            ) : null
+            <View>
+              {notes ? (
+                <Card style={styles.notes}>
+                  <Card.Content>
+                    <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                      Observações
+                    </Text>
+                    <Text variant="bodyMedium">{notes}</Text>
+                  </Card.Content>
+                </Card>
+              ) : null}
+              {progressText ? (
+                <Text
+                  variant="bodyMedium"
+                  style={[styles.progress, { color: theme.colors.onSurfaceVariant }]}
+                >
+                  {progressText}
+                </Text>
+              ) : null}
+            </View>
           }
           ListEmptyComponent={
             <Text variant="bodyLarge" style={styles.empty}>
@@ -131,10 +167,6 @@ export default function ShoppingListDetailsScreen({ route, navigation }) {
           contentContainerStyle={styles.list}
         />
       </StatusView>
-
-      <Snackbar visible={Boolean(message)} onDismiss={() => setMessage('')}>
-        {message}
-      </Snackbar>
     </View>
   );
 }
@@ -143,9 +175,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   list: {
     padding: 16,
     paddingBottom: 48,
+  },
+  notes: {
+    marginBottom: 12,
   },
   progress: {
     marginBottom: 8,

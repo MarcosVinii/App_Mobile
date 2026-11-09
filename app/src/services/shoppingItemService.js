@@ -1,10 +1,10 @@
 import { apiRequest } from './api';
 
-// status: 'pending' ou 'purchased'
-export async function changeItemStatus(itemId, status) {
-  const data = await apiRequest(`/shopping-items/${itemId}/status`, {
+// status: 'pending' ou 'purchased'.
+// Devolve { item, outcome }; outcome diz o que aconteceu com o estoque.
+export function changeItemStatus(itemId, status, smartOrganization) {
+  return apiRequest(`/shopping-items/${itemId}/status`, {
     method: 'PATCH',
-    body: { status },
+    body: { status, smart_organization: smartOrganization },
   });
-  return data.item;
 }

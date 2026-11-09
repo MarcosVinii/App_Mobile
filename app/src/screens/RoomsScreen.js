@@ -6,6 +6,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import ConfirmDialog from '../components/ConfirmDialog';
 import RoomCard from '../components/RoomCard';
 import StatusView from '../components/StatusView';
+import WarehouseFab from '../components/WarehouseFab';
 import useRooms from '../hooks/useRooms';
 import * as roomService from '../services/roomService';
 
@@ -83,6 +84,8 @@ export default function RoomsScreen({ navigation }) {
       <Snackbar visible={Boolean(message)} onDismiss={() => setMessage('')}>
         {message}
       </Snackbar>
+
+      <WarehouseFab />
     </View>
   );
 }
