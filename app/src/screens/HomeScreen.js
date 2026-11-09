@@ -10,6 +10,7 @@ import SummaryCard from '../components/SummaryCard';
 import WarehouseFab from '../components/WarehouseFab';
 import useAuth from '../hooks/useAuth';
 import useRooms from '../hooks/useRooms';
+import useStockNotifications from '../hooks/useStockNotifications';
 import useToast from '../hooks/useToast';
 import { statusColors } from '../theme/theme';
 
@@ -26,6 +27,7 @@ export default function HomeScreen({ navigation }) {
   const { user } = useAuth();
   const { showToast } = useToast();
   const { rooms, isLoading, error, reload } = useRooms();
+  useStockNotifications();
 
   useFocusEffect(
     useCallback(() => {

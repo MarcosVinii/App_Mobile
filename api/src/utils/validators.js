@@ -132,6 +132,8 @@ function validateQuantityDelta(body = {}) {
 
 module.exports = {
   MAX_QUANTITY,
+  EMAIL_REGEX,
+  normalizeEmail,
   toNumber,
   roundQuantity,
   parseId,

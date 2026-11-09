@@ -7,6 +7,10 @@ const {
   validateRegisterInput,
   validateLoginInput,
 } = require('../utils/validators');
+const {
+  validateProfileInput,
+  validatePasswordChangeInput,
+} = require('../utils/profileValidators');
 
 const SALT_ROUNDS = 10;
 
@@ -55,4 +59,34 @@ function getProfile(userId) {
   return user;
 }
 
-module.exports = { register, login, getProfile };
+function updateProfile(userId, body) {
+  const { name, email } = validateProfileInput(body);
+  const existing = userRepository.findByEmail(email);
+
+  if (existing && existing.id !== userId) {
+    throw new AppError('Este e-mail já está em uso por outra conta.', 409);
+  }
+
+  return userRepository.updateProfile(userId, { name, email });
+}
+
+async function changePassword(userId, body) {
+  const { currentPassword, newPassword } = validatePasswordChangeInput(body);
+
+  const userRow = userRepository.findByIdWithHash(userId);
+
+  if (!userRow) {
+    throw new AppError('Usuário não encontrado.', 404);
+  }
+
+  const currentMatches = await bcrypt.compare(currentPassword, userRow.password_hash);
+
+  if (!currentMatches) {
+    throw new AppError('A senha atual está incorreta.', 400);
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+  userRepository.updatePasswordHash(userId, passwordHash);
+}
+
+module.exports = { register, login, getProfile, updateProfile, changePassword };

@@ -27,4 +27,22 @@ function me(req, res, next) {
   }
 }
 
-module.exports = { register, login, me };
+function updateMe(req, res, next) {
+  try {
+    const user = authService.updateProfile(req.userId, req.body);
+    res.json({ user });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function changePassword(req, res, next) {
+  try {
+    await authService.changePassword(req.userId, req.body);
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+}
+
+module.exports = { register, login, me, updateMe, changePassword };

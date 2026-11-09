@@ -2,8 +2,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, HelperText, Text, TextInput, useTheme } from 'react-native-paper';
 
+import FoodSearchPanel from '../components/FoodSearchPanel';
 import OptionChips from '../components/OptionChips';
 import StatusView from '../components/StatusView';
+import useToast from '../hooks/useToast';
 import * as categoryService from '../services/categoryService';
 import * as productService from '../services/productService';
 import * as roomService from '../services/roomService';
@@ -17,6 +19,7 @@ export default function ProductFormScreen({ route, navigation }) {
   const productId = route.params?.productId;
   const isEditing = Boolean(productId);
   const theme = useTheme();
+  const { showToast } = useToast();
 
   const [rooms, setRooms] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -71,6 +74,20 @@ export default function ProductFormScreen({ route, navigation }) {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Preenche nome, descrição e categoria com o alimento escolhido no Open Food Facts
+  function handleFoodSelected(food) {
+    setName(food.name);
+    setDescription(food.description);
+
+    const foodCategory = categories.find((category) => category.name === 'Alimentos');
+    if (foodCategory) {
+      setCategoryId(foodCategory.id);
+    }
+
+    setErrors({});
+    showToast(`Dados de "${food.name}" preenchidos. Revise e salve.`, { type: 'success' });
+  }
 
   async function handleSave() {
     const validationErrors = validateProductForm({
@@ -129,6 +146,8 @@ export default function ProductFormScreen({ route, navigation }) {
     >
       <StatusView isLoading={isLoading} error={loadError} onRetry={loadData}>
         <View style={styles.form}>
+          {!isEditing ? <FoodSearchPanel onSelect={handleFoodSelected} /> : null}
+
           <TextInput
             label="Nome do produto"
             mode="outlined"
