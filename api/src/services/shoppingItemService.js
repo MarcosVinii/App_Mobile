@@ -2,6 +2,8 @@ const shoppingListRepository = require('../repositories/shoppingListRepository')
 const shoppingSectionRepository = require('../repositories/shoppingSectionRepository');
 const shoppingItemRepository = require('../repositories/shoppingItemRepository');
 const productRepository = require('../repositories/productRepository');
+const purchaseService = require('./purchaseService');
+const { runInTransaction } = require('../database/transaction');
 const AppError = require('../utils/AppError');
 const { normalizeText } = require('../utils/textNormalizer');
 const { parseId } = require('../utils/validators');
@@ -99,25 +101,46 @@ function createItem(userId, body = {}) {
 
 function updateItem(userId, itemId, body) {
   const item = getItem(userId, itemId);
+
+  if (item.status === 'purchased') {
+    throw new AppError(
+      'Desmarque o item como comprado antes de editar a quantidade ou o nome.',
+      409
+    );
+  }
+
   const data = validateItemInput(body);
   const nameNormalized = normalizeText(data.name);
 
-  if (item.status === 'pending') {
-    assertNotDuplicated(item.list_id, nameNormalized, item.product_id, item.id);
-  }
+  assertNotDuplicated(item.list_id, nameNormalized, item.product_id, item.id);
 
   return shoppingItemRepository.update(itemId, { nameNormalized, ...data });
 }
 
-function changeStatus(userId, itemId, body) {
+// Marca ou desmarca como comprado. Ao marcar, o estoque é atualizado
+// (organização inteligente ligada) ou o item vai para o Armazém.
+function changeStatus(userId, itemId, body = {}) {
   const item = getItem(userId, itemId);
   const status = validateStatusInput(body);
 
   if (item.status === status) {
-    return item;
+    return { item, outcome: { type: 'none' } };
   }
 
-  return shoppingItemRepository.updateStatus(itemId, status);
+  const smartOrganization = body.smart_organization === true;
+
+  return runInTransaction(() => {
+    if (status === 'purchased') {
+      const updated = shoppingItemRepository.updateStatus(itemId, 'purchased');
+      const outcome = purchaseService.registerPurchase(userId, updated, smartOrganization);
+
+      return { item: updated, outcome };
+    }
+
+    const outcome = purchaseService.undoPurchase(userId, item);
+
+    return { item: shoppingItemRepository.updateStatus(itemId, 'pending'), outcome };
+  });
 }
 
 function deleteItem(userId, itemId) {

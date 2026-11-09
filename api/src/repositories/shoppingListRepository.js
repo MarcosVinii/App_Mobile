@@ -2,7 +2,7 @@ const db = require('../database/connection');
 
 // Itens descartados (dismissed) não entram nas contagens
 const SELECT_LIST = `
-  SELECT l.id, l.title, l.kind, l.created_at, l.updated_at,
+  SELECT l.id, l.title, l.kind, l.notes, l.created_at, l.updated_at,
          COUNT(i.id) AS total_items,
          COALESCE(SUM(CASE WHEN i.status = 'pending' THEN 1 ELSE 0 END), 0) AS pending_items,
          COALESCE(SUM(CASE WHEN i.status = 'purchased' THEN 1 ELSE 0 END), 0) AS purchased_items
@@ -30,19 +30,19 @@ function findByIdForUser(id, userId) {
     .get(id, userId);
 }
 
-function create({ userId, title, kind = 'custom' }) {
+function create({ userId, title, kind = 'custom', notes = null }) {
   const result = db
-    .prepare('INSERT INTO shopping_lists (user_id, title, kind) VALUES (?, ?, ?)')
-    .run(userId, title, kind);
+    .prepare('INSERT INTO shopping_lists (user_id, title, kind, notes) VALUES (?, ?, ?, ?)')
+    .run(userId, title, kind, notes);
 
   return findByIdForUser(Number(result.lastInsertRowid), userId);
 }
 
-function updateTitle(id, userId, title) {
+function update(id, userId, { title, notes }) {
   db.prepare(
-    `UPDATE shopping_lists SET title = ?, updated_at = datetime('now')
+    `UPDATE shopping_lists SET title = ?, notes = ?, updated_at = datetime('now')
      WHERE id = ? AND user_id = ?`
-  ).run(title, id, userId);
+  ).run(title, notes, id, userId);
 
   return findByIdForUser(id, userId);
 }
@@ -56,6 +56,6 @@ module.exports = {
   findSmartByUser,
   findByIdForUser,
   create,
-  updateTitle,
+  update,
   remove,
 };

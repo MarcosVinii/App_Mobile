@@ -32,10 +32,10 @@ function update(req, res, next) {
   }
 }
 
+// Responde { item, outcome }; outcome diz o que aconteceu com o estoque
 function changeStatus(req, res, next) {
   try {
-    const item = shoppingItemService.changeStatus(req.userId, itemId(req), req.body);
-    res.json({ item });
+    res.json(shoppingItemService.changeStatus(req.userId, itemId(req), req.body));
   } catch (error) {
     next(error);
   }

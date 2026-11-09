@@ -8,6 +8,13 @@ const {
   validateOrderInput,
 } = require('../utils/shoppingValidators');
 
+function defaultListTitle() {
+  const now = new Date();
+  const pad = (value) => String(value).padStart(2, '0');
+
+  return `Lista de ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+}
+
 function getList(userId, listId) {
   const list = shoppingListRepository.findByIdForUser(listId, userId);
 
@@ -55,18 +62,28 @@ function getListDetail(userId, listId) {
   };
 }
 
+// Título é opcional: sem título, a lista recebe "Lista de dd/mm/aaaa"
 function createList(userId, body) {
-  const { title } = validateListInput(body);
+  const { title, notes } = validateListInput(body);
 
-  return shoppingListRepository.create({ userId, title });
+  return shoppingListRepository.create({
+    userId,
+    title: title || defaultListTitle(),
+    notes: notes || null,
+  });
 }
 
+// Atualiza título e/ou observações. O que não for enviado é mantido.
 function renameList(userId, listId, body) {
-  assertCustomList(getList(userId, listId));
+  const list = getList(userId, listId);
+  assertCustomList(list);
 
-  const { title } = validateListInput(body);
+  const { title, notes } = validateListInput(body);
 
-  return shoppingListRepository.updateTitle(listId, userId, title);
+  return shoppingListRepository.update(listId, userId, {
+    title: title || list.title,
+    notes: notes !== undefined ? notes || null : list.notes,
+  });
 }
 
 function deleteList(userId, listId) {

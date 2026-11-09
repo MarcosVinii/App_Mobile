@@ -9,6 +9,7 @@ const {
 
 const SECTION_TYPES = ['section', 'divider'];
 const ITEM_STATUSES = ['pending', 'purchased'];
+const MAX_NOTES_LENGTH = 2000;
 
 function parseOptionalId(value, message) {
   if (value === undefined || value === null) return null;
@@ -16,14 +17,27 @@ function parseOptionalId(value, message) {
   return parseId(value, message);
 }
 
+// Título e observações são opcionais.
+// title: texto ou null (sem título); notes: texto ou undefined (não enviado)
 function validateListInput(body = {}) {
-  const title = String(body.title || '').trim();
+  const title =
+    body.title === undefined || body.title === null ? '' : String(body.title).trim();
 
-  if (title.length < 2 || title.length > 60) {
+  if (title !== '' && (title.length < 2 || title.length > 60)) {
     throw new AppError('O título da lista deve ter entre 2 e 60 caracteres.', 400);
   }
 
-  return { title };
+  const notes =
+    body.notes === undefined || body.notes === null ? undefined : String(body.notes).trim();
+
+  if (notes !== undefined && notes.length > MAX_NOTES_LENGTH) {
+    throw new AppError(
+      `As observações devem ter no máximo ${MAX_NOTES_LENGTH} caracteres.`,
+      400
+    );
+  }
+
+  return { title: title || null, notes };
 }
 
 function validateSectionInput(body = {}) {

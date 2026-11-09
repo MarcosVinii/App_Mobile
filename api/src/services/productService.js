@@ -1,6 +1,7 @@
 const productRepository = require('../repositories/productRepository');
 const roomRepository = require('../repositories/roomRepository');
 const categoryRepository = require('../repositories/categoryRepository');
+const stockMovementService = require('./stockMovementService');
 const AppError = require('../utils/AppError');
 const {
   validateProductInput,
@@ -50,11 +51,7 @@ function changeQuantity(userId, productId, body) {
   getProduct(userId, productId);
 
   const delta = validateQuantityDelta(body);
-  const wasApplied = productRepository.adjustQuantity(productId, userId, delta);
-
-  if (!wasApplied) {
-    throw new AppError('A quantidade não pode ficar negativa.', 400);
-  }
+  stockMovementService.applyManualAdjustment(userId, productId, delta);
 
   return productRepository.findByIdForUser(productId, userId);
 }

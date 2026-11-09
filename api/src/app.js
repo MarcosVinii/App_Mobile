@@ -8,6 +8,8 @@ const productRoutes = require('./routes/productRoutes');
 const shoppingListRoutes = require('./routes/shoppingListRoutes');
 const shoppingSectionRoutes = require('./routes/shoppingSectionRoutes');
 const shoppingItemRoutes = require('./routes/shoppingItemRoutes');
+const warehouseRoutes = require('./routes/warehouseRoutes');
+const stockMovementRoutes = require('./routes/stockMovementRoutes');
 const { notFound, errorHandler } = require('./middlewares/errorHandler');
 
 const app = express();
@@ -23,6 +25,8 @@ app.use(productRoutes);
 app.use(shoppingListRoutes);
 app.use(shoppingSectionRoutes);
 app.use(shoppingItemRoutes);
+app.use(warehouseRoutes);
+app.use(stockMovementRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
