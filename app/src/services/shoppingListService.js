@@ -35,3 +35,19 @@ export async function updateList(listId, { title, notes }) {
 export function deleteList(listId) {
   return apiRequest(`/shopping-lists/${listId}`, { method: 'DELETE' });
 }
+
+// order: { sections: [ids], items: { none: [ids], "<idDaSecao>": [ids] } }
+export function reorderList(listId, order) {
+  return apiRequest(`/shopping-lists/${listId}/order`, {
+    method: 'PUT',
+    body: order,
+  });
+}
+
+// Interpreta texto como "- Arroz #2 kg". Devolve { result, list, sections, items }
+export function importCommands(listId, text) {
+  return apiRequest(`/shopping-lists/${listId}/commands`, {
+    method: 'POST',
+    body: { text },
+  });
+}
