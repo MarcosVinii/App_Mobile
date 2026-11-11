@@ -1,4 +1,4 @@
-# Casa em Ordem
+# DOMUS
 
 Aplicativo mobile para organizar a casa: controla os produtos de cada cômodo, avisa quando o estoque está baixo e transforma isso em listas de compras que atualizam o estoque sozinhas.
 
@@ -18,7 +18,7 @@ Em casa, é comum não saber o que ainda tem em cada cômodo. O resultado: produ
 
 > Rascunho: adapte com um exemplo real da sua rotina.
 
-Organizar a casa exige lembrar o que existe, o que está acabando e o que precisa ser comprado. Fazer isso de cabeça gera esquecimentos e desperdício. Com o Casa em Ordem, o estoque fica registrado por cômodo, os alertas avisam antes de faltar algo, e as listas de compras nascem prontas a partir do que realmente está acabando. Na hora da compra, marcar o item atualiza o estoque sem digitar nada de novo, o que torna as compras mais eficientes e a organização doméstica mais leve e constante.
+Organizar a casa exige lembrar o que existe, o que está acabando e o que precisa ser comprado. Fazer isso de cabeça gera esquecimentos e desperdício. Com o Domus, o estoque fica registrado por cômodo, os alertas avisam antes de faltar algo, e as listas de compras nascem prontas a partir do que realmente está acabando. Na hora da compra, marcar o item atualiza o estoque sem digitar nada de novo, o que torna as compras mais eficientes e a organização doméstica mais leve e constante.
 
 ## 4. Tecnologias
 
@@ -79,7 +79,7 @@ npx expo start --web
 Estrutura do repositório:
 
 ```text
-casa-em-ordem/
+Domus/
 ├── app/   aplicativo mobile (React Native + Expo)
 └── api/   backend (Node.js + Express + SQLite)
 ```
