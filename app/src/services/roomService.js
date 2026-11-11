@@ -10,18 +10,19 @@ export async function getRoom(roomId) {
   return data.room;
 }
 
-export async function createRoom({ name, icon }) {
+// image: texto base64 (data URL), null para remover ou undefined para não mexer
+export async function createRoom({ name, icon, image }) {
   const data = await apiRequest('/rooms', {
     method: 'POST',
-    body: { name, icon },
+    body: { name, icon, image },
   });
   return data.room;
 }
 
-export async function updateRoom(roomId, { name, icon }) {
+export async function updateRoom(roomId, { name, icon, image }) {
   const data = await apiRequest(`/rooms/${roomId}`, {
     method: 'PUT',
-    body: { name, icon },
+    body: { name, icon, image },
   });
   return data.room;
 }

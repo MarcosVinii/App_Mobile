@@ -10,7 +10,7 @@ function countByStatus(status) {
 
 // O LEFT JOIN mantém cômodos sem nenhum produto (com contagens zeradas)
 const SELECT_ROOM = `
-  SELECT r.id, r.name, r.icon, r.created_at,
+  SELECT r.id, r.name, r.icon, r.image, r.created_at,
          COUNT(p.id) AS total_products,
          ${countByStatus('normal')} AS normal_products,
          ${countByStatus('low_stock')} AS low_stock_products,
@@ -40,21 +40,18 @@ function findByNameForUser(name, userId) {
     .get(userId, name);
 }
 
-function create({ userId, name, icon }) {
+function create({ userId, name, icon, image = null }) {
   const result = db
-    .prepare('INSERT INTO rooms (user_id, name, icon) VALUES (?, ?, ?)')
-    .run(userId, name, icon);
+    .prepare('INSERT INTO rooms (user_id, name, icon, image) VALUES (?, ?, ?, ?)')
+    .run(userId, name, icon, image);
 
   return findByIdForUser(Number(result.lastInsertRowid), userId);
 }
 
-function update(id, userId, { name, icon }) {
-  db.prepare('UPDATE rooms SET name = ?, icon = ? WHERE id = ? AND user_id = ?').run(
-    name,
-    icon,
-    id,
-    userId
-  );
+function update(id, userId, { name, icon, image }) {
+  db.prepare(
+    'UPDATE rooms SET name = ?, icon = ?, image = ? WHERE id = ? AND user_id = ?'
+  ).run(name, icon, image, id, userId);
 
   return findByIdForUser(id, userId);
 }

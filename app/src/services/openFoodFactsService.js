@@ -15,7 +15,7 @@ async function fetchJson(url) {
 
   // O Open Food Facts pede que o app se identifique (o navegador não permite definir isso)
   if (Platform.OS !== 'web') {
-    headers['User-Agent'] = 'CasaEmOrdem/1.0 (projeto academico)';
+    headers['User-Agent'] = 'Domus/1.0 (projeto academico)';
   }
 
   try {

@@ -35,7 +35,7 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <>
-      <AuthLayout title="Casa em Ordem" subtitle="Entre para organizar sua casa.">
+      <AuthLayout title="Domus" subtitle="Entre para organizar sua casa.">
         <TextInput
           label="E-mail"
           mode="outlined"

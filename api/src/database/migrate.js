@@ -188,6 +188,8 @@ function seedCategories() {
 function runMigrations() {
   createTables();
   addColumnIfMissing('shopping_lists', 'notes', 'TEXT');
+  addColumnIfMissing('rooms', 'image', 'TEXT');
+  addColumnIfMissing('products', 'image', 'TEXT');
   seedCategories();
 }
 

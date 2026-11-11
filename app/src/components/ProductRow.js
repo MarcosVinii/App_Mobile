@@ -1,8 +1,9 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { List } from 'react-native-paper';
 
 import { formatQuantity } from '../utils/units';
 import { getStockStatusInfo, isAlertStatus } from '../utils/stock';
+import EntityAvatar from './EntityAvatar';
 
 // Linha compacta de produto. Produtos em alerta ganham cor, ícone e texto.
 export default function ProductRow({ product, onPress }) {
@@ -15,7 +16,15 @@ export default function ProductRow({ product, onPress }) {
       title={product.name}
       titleStyle={hasAlert ? { color: info.color } : undefined}
       description={hasAlert ? `${quantityText} · ${info.label}` : quantityText}
-      left={(props) => <List.Icon {...props} icon={product.category_icon} />}
+      left={(props) =>
+        product.image ? (
+          <View style={[props.style, styles.thumb]}>
+            <EntityAvatar size={40} image={product.image} icon={product.category_icon} />
+          </View>
+        ) : (
+          <List.Icon {...props} icon={product.category_icon} />
+        )
+      }
       right={() =>
         hasAlert ? <List.Icon icon={info.icon} color={info.color} /> : null
       }
@@ -29,5 +38,8 @@ export default function ProductRow({ product, onPress }) {
 const styles = StyleSheet.create({
   row: {
     paddingVertical: 2,
+  },
+  thumb: {
+    justifyContent: 'center',
   },
 });

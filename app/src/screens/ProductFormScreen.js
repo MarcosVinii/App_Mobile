@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, HelperText, Text, TextInput, useTheme } from 'react-native-paper';
 
 import FoodSearchPanel from '../components/FoodSearchPanel';
+import ImagePickerField from '../components/ImagePickerField';
 import OptionChips from '../components/OptionChips';
 import StatusView from '../components/StatusView';
 import useToast from '../hooks/useToast';
@@ -31,6 +32,7 @@ export default function ProductFormScreen({ route, navigation }) {
   const [quantity, setQuantity] = useState('1');
   const [minQuantity, setMinQuantity] = useState('0');
   const [unit, setUnit] = useState(DEFAULT_UNIT);
+  const [image, setImage] = useState(null);
 
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
@@ -61,6 +63,7 @@ export default function ProductFormScreen({ route, navigation }) {
         setQuantity(formatNumber(product.quantity));
         setMinQuantity(formatNumber(product.min_quantity));
         setUnit(product.unit);
+        setImage(product.image || null);
       } else {
         setCategoryId(loadedCategories[0]?.id ?? null);
       }
@@ -109,6 +112,7 @@ export default function ProductFormScreen({ route, navigation }) {
       category_id: categoryId,
       quantity: parseDecimal(quantity),
       min_quantity: parseDecimal(minQuantity),
+      image,
       unit,
     };
 
@@ -147,6 +151,12 @@ export default function ProductFormScreen({ route, navigation }) {
       <StatusView isLoading={isLoading} error={loadError} onRetry={loadData}>
         <View style={styles.form}>
           {!isEditing ? <FoodSearchPanel onSelect={handleFoodSelected} /> : null}
+
+          <ImagePickerField
+            image={image}
+            icon={categories.find((category) => category.id === categoryId)?.icon || 'package-variant'}
+            onChange={setImage}
+          />
 
           <TextInput
             label="Nome do produto"

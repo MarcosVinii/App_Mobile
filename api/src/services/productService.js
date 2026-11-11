@@ -3,6 +3,7 @@ const roomRepository = require('../repositories/roomRepository');
 const categoryRepository = require('../repositories/categoryRepository');
 const stockMovementService = require('./stockMovementService');
 const AppError = require('../utils/AppError');
+const { parseImage } = require('../utils/imageValidator');
 const {
   validateProductInput,
   validateQuantityDelta,
@@ -33,18 +34,23 @@ function getProduct(userId, productId) {
 
 function createProduct(userId, body) {
   const data = validateProductInput(body);
+  const image = parseImage(body?.image) ?? null;
+
   assertReferencesAreValid(userId, data);
 
-  return productRepository.create({ userId, ...data });
+  return productRepository.create({ userId, ...data, image });
 }
 
 function updateProduct(userId, productId, body) {
-  getProduct(userId, productId);
+  const current = getProduct(userId, productId);
 
   const data = validateProductInput(body);
+  const imageInput = parseImage(body?.image);
+  const image = imageInput === undefined ? current.image : imageInput;
+
   assertReferencesAreValid(userId, data);
 
-  return productRepository.update(productId, userId, data);
+  return productRepository.update(productId, userId, { ...data, image });
 }
 
 function changeQuantity(userId, productId, body) {

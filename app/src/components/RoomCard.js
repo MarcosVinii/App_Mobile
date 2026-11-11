@@ -1,6 +1,7 @@
 import { StyleSheet } from 'react-native';
-import { Avatar, Card, IconButton } from 'react-native-paper';
+import { Card, IconButton } from 'react-native-paper';
 
+import EntityAvatar from './EntityAvatar';
 import RoomStockSummary from './RoomStockSummary';
 
 export default function RoomCard({ room, onPress, onEdit, onDelete }) {
@@ -13,7 +14,7 @@ export default function RoomCard({ room, onPress, onEdit, onDelete }) {
       <Card.Title
         title={room.name}
         titleVariant="titleMedium"
-        left={(props) => <Avatar.Icon {...props} icon={room.icon} />}
+        left={(props) => <EntityAvatar {...props} image={room.image} icon={room.icon} />}
         right={() => (
           <>
             <IconButton

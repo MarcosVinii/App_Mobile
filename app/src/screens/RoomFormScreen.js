@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Chip, HelperText, Text, TextInput, useTheme } from 'react-native-paper';
 
+import ImagePickerField from '../components/ImagePickerField';
 import RoomIconPicker from '../components/RoomIconPicker';
 import StatusView from '../components/StatusView';
 import * as roomService from '../services/roomService';
@@ -15,6 +16,7 @@ export default function RoomFormScreen({ route, navigation }) {
 
   const [name, setName] = useState('');
   const [icon, setIcon] = useState(DEFAULT_ROOM_ICON);
+  const [image, setImage] = useState(null);
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,6 +34,7 @@ export default function RoomFormScreen({ route, navigation }) {
       const room = await roomService.getRoom(roomId);
       setName(room.name);
       setIcon(room.icon);
+      setImage(room.image || null);
     } catch (err) {
       setLoadError(err.message);
     } finally {
@@ -58,7 +61,7 @@ export default function RoomFormScreen({ route, navigation }) {
 
     setIsSubmitting(true);
     try {
-      const data = { name: name.trim(), icon };
+      const data = { name: name.trim(), icon, image };
 
       if (isEditing) {
         await roomService.updateRoom(roomId, data);
@@ -116,6 +119,7 @@ export default function RoomFormScreen({ route, navigation }) {
             Ícone
           </Text>
           <RoomIconPicker value={icon} onChange={setIcon} />
+          <ImagePickerField image={image} icon={icon} onChange={setImage} />
 
           <HelperText type="error" visible={Boolean(submitError)}>
             {submitError}

@@ -5,6 +5,7 @@ import { Avatar, Card, IconButton, Text, useTheme } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
 
 import { getRoomStatus } from '../utils/roomStatus';
+import EntityAvatar from './EntityAvatar';
 import RoomStockSummary from './RoomStockSummary';
 
 const AUTO_ADVANCE_MS = 4000;
@@ -24,7 +25,7 @@ function RoomSlide({ room, width, onPress }) {
     >
       <Card.Content style={styles.slideContent}>
         <View style={styles.slideHeader}>
-          <Avatar.Icon size={52} icon={room.icon} />
+          <EntityAvatar size={52} icon={room.icon} image={room.image} />
           <View style={styles.slideTitle}>
             <Text variant="titleMedium" numberOfLines={1}>
               {room.name}

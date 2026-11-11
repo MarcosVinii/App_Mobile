@@ -3,11 +3,15 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { Avatar, Button, IconButton, Snackbar, Text, useTheme } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
 
+import AddToListDialog from '../components/AddToListDialog';
 import ConfirmDialog from '../components/ConfirmDialog';
+import EntityAvatar from '../components/EntityAvatar';
 import StatusView from '../components/StatusView';
 import StockStatusBadge from '../components/StockStatusBadge';
 import * as productService from '../services/productService';
+import useToast from '../hooks/useToast';
 import { formatNumber } from '../utils/numbers';
+import { isAlertStatus } from '../utils/stock';
 import { formatQuantity, getQuantityStep, getUnitShort } from '../utils/units';
 
 function InfoRow({ label, value }) {
@@ -34,6 +38,8 @@ export default function ProductDetailsScreen({ route, navigation }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [message, setMessage] = useState('');
+  const [showAddToList, setShowAddToList] = useState(false);
+  const { showToast } = useToast();
 
   const loadProduct = useCallback(async () => {
     setError('');
@@ -96,7 +102,7 @@ export default function ProductDetailsScreen({ route, navigation }) {
       <StatusView isLoading={isLoading} error={error} onRetry={handleRetry}>
         {product ? (
           <View style={styles.body}>
-            <Avatar.Icon icon={product.category_icon} size={72} style={styles.avatar} />
+            <EntityAvatar image={product.image} icon={product.category_icon} size={72} style={styles.avatar} />
             <Text variant="headlineSmall" style={styles.name}>
               {product.name}
             </Text>
@@ -130,6 +136,15 @@ export default function ProductDetailsScreen({ route, navigation }) {
             >
               Cada toque altera {formatQuantity(getQuantityStep(product.unit), product.unit)}.
             </Text>
+
+            <Button
+              mode={isAlertStatus(product.stock_status) ? 'contained' : 'outlined'}
+              icon="cart-plus"
+              onPress={() => setShowAddToList(true)}
+              style={styles.action}
+            >
+              Adicionar à lista de compras
+            </Button>
 
             <View style={styles.info}>
               <InfoRow label="Cômodo" value={product.room_name} />
@@ -170,6 +185,16 @@ export default function ProductDetailsScreen({ route, navigation }) {
         isLoading={isDeleting}
         onConfirm={handleConfirmDelete}
         onDismiss={() => setShowDeleteDialog(false)}
+      />
+
+      <AddToListDialog
+        visible={showAddToList}
+        product={product}
+        onDismiss={() => setShowAddToList(false)}
+        onAdded={(list) => {
+          setShowAddToList(false);
+          showToast(`${product.name} adicionado à lista "${list.title}".`, { type: 'success' });
+        }}
       />
 
       <Snackbar visible={Boolean(message)} onDismiss={() => setMessage('')}>

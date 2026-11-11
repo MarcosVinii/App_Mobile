@@ -1,6 +1,7 @@
 const roomRepository = require('../repositories/roomRepository');
 const AppError = require('../utils/AppError');
 const { validateRoomInput } = require('../utils/validators');
+const { parseImage } = require('../utils/imageValidator');
 
 function assertNameAvailable(userId, name, ignoreRoomId = null) {
   const existing = roomRepository.findByNameForUser(name, userId);
@@ -26,18 +27,23 @@ function getRoom(userId, roomId) {
 
 function createRoom(userId, body) {
   const data = validateRoomInput(body);
+  const image = parseImage(body?.image) ?? null;
+
   assertNameAvailable(userId, data.name);
 
-  return roomRepository.create({ userId, ...data });
+  return roomRepository.create({ userId, ...data, image });
 }
 
 function updateRoom(userId, roomId, body) {
-  getRoom(userId, roomId);
+  const current = getRoom(userId, roomId);
 
   const data = validateRoomInput(body);
+  const imageInput = parseImage(body?.image);
+  const image = imageInput === undefined ? current.image : imageInput;
+
   assertNameAvailable(userId, data.name, roomId);
 
-  return roomRepository.update(roomId, userId, data);
+  return roomRepository.update(roomId, userId, { ...data, image });
 }
 
 function deleteRoom(userId, roomId) {

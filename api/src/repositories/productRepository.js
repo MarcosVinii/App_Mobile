@@ -4,7 +4,7 @@ const { STOCK_STATUS_SQL } = require('./stockStatusSql');
 const SELECT_PRODUCT = `
   SELECT p.id, p.room_id, r.name AS room_name,
          p.category_id, c.name AS category_name, c.icon AS category_icon,
-         p.name, p.description, p.quantity, p.min_quantity, p.unit,
+         p.name, p.description, p.image, p.quantity, p.min_quantity, p.unit,
          ${STOCK_STATUS_SQL} AS stock_status,
          p.created_at, p.updated_at
   FROM products p
@@ -32,14 +32,24 @@ function findByIdForUser(id, userId) {
     .get(id, userId);
 }
 
-function create({ userId, roomId, categoryId, name, description, quantity, minQuantity, unit }) {
+function create({
+  userId,
+  roomId,
+  categoryId,
+  name,
+  description,
+  image = null,
+  quantity,
+  minQuantity,
+  unit,
+}) {
   const result = db
     .prepare(
       `INSERT INTO products
-         (user_id, room_id, category_id, name, description, quantity, min_quantity, unit)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+         (user_id, room_id, category_id, name, description, image, quantity, min_quantity, unit)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
-    .run(userId, roomId, categoryId, name, description, quantity, minQuantity, unit);
+    .run(userId, roomId, categoryId, name, description, image, quantity, minQuantity, unit);
 
   return findByIdForUser(Number(result.lastInsertRowid), userId);
 }
@@ -47,7 +57,7 @@ function create({ userId, roomId, categoryId, name, description, quantity, minQu
 function update(id, userId, data) {
   db.prepare(
     `UPDATE products
-     SET room_id = ?, category_id = ?, name = ?, description = ?,
+     SET room_id = ?, category_id = ?, name = ?, description = ?, image = ?,
          quantity = ?, min_quantity = ?, unit = ?, updated_at = datetime('now')
      WHERE id = ? AND user_id = ?`
   ).run(
@@ -55,6 +65,7 @@ function update(id, userId, data) {
     data.categoryId,
     data.name,
     data.description,
+    data.image,
     data.quantity,
     data.minQuantity,
     data.unit,
